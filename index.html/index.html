@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FS University</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+<style>
+/* Reset & Base */
+*{margin:0;padding:0;box-sizing:border-box;font-family:Poppins,sans-serif}
+
+body {
+  color: #000;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* Background blur */
+body::before {
+    content:"";
+    position:fixed;
+    inset:0;
+    background:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTdHTfEPYQdti1yzZ8XHhbqbn4SIbZo4o7OMA&s') center/cover no-repeat;
+    filter:blur(5px);
+    z-index:-1;
+}
+
+/* HEADER */
+header {
+    background:#0f172a;
+    color:#fff;
+    padding:12px 5%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    position:sticky;
+    top:0;
+    z-index:1000;
+}
+
+.logo { display:flex; align-items:center; gap:10px; }
+.logo img { height:44px; border-radius: 4px; }
+
+/* NAVIGATION */
+nav { display:flex; gap:18px; }
+nav a { color:#fff; text-decoration:none; font-weight:500; font-size: 14px; transition: 0.3s; }
+nav a:hover { color:#38bdf8; }
+
+.menu-btn { display:none; font-size:26px; cursor:pointer; }
+
+/* HERO SLIDER */
+.hero-slider {
+    position:relative;
+    width:100%;
+    height:90vh; 
+    overflow:hidden;
+    background: #000;
+}
+.hero-slide {
+    position:absolute;
+    inset:0;
+    opacity:0;
+    transition:opacity 1s ease-in-out;
+}
+.hero-slide img { width:100%; height:100%; object-fit:cover; }
+.hero-slide.active { opacity:1; }
+
+.hero-content {
+    position:absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index:10;
+    width:85%;
+    color:#f36608;
+    text-align:center;
+    
+    padding: 20px;
+    border-radius: 10px;
+}
+.hero-content h2 { font-size: clamp(24px, 5vw, 42px); font-weight:800; }
+/* About us aur Courses heading ko attractive banane ke liye */
+#About-us h2 {
+  background-color: #db1c03;
+    text-align: center;         /* Center mein karne ke liye */
+    font-size: 3rem;            /* Bada dikhne ke liye */
+    font-weight: 800;           /* Bold look ke liye */
+    color: #eaecf1;             /* Dark blue color */
+    margin-top: 40px;           /* Upar se gap */
+    margin-bottom: 0%;        /* Neeche se gap */
+    text-transform: uppercase;  /* Saare letters bade karne ke liye */
+    letter-spacing: 1px;        /* Letters ke beech gap */
+    position: relative;
+    padding-bottom: 10px;
+}
+
+/* Heading ke neeche ek sundar line add karne ke liye */
+#About-us h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20%;                /* Line ki lambai */
+    height: 4px;                /* Line ki motai */
+    background: #e98707;        /* Orange color ki line */
+    border-radius: 2px;
+}
+/* SECTION STYLING (The Stability Fix) */
+.section-paragraph {
+  text-align: justify;
+    display:flex;
+    gap:40px;
+    padding: 50px 8%;
+    align-items:center;
+    background: rgba(255,255,255,0.9);
+    margin: 20px 0;
+}
+
+/* Desktop Images */
+.section-paragraph img {
+    width: 40%; /* Responsive width */
+    max-width: 500px;
+    height: auto;
+    border-radius:12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.section-paragraph .text { width: 60%; }
+.section-paragraph:nth-child(even) { flex-direction:row-reverse; }
+
+.social-sidebar {
+  position: fixed;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  z-index: 9999;
+}
+.social-sidebar img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0px 4px 8px rgba(0,0,0,0.3);
+  /* Smooth rotation ke liye */
+  transition: transform 0.1s linear; 
+}
+@media(max-width:768px){
+  .social-sidebar {
+    position: fixed;
+    bottom: 10px;
+    top: auto;
+    right: 50%;
+    transform: translateX(50%);
+    flex-direction: row;
+    background: rgba(0,0,0,0.6);
+    padding: 8px;
+    border-radius: 20px;
+  }
+
+  .social-sidebar img {
+    width: 35px;
+    height: 35px;
+  }
+}
+
+/* 📱 MOBILE OPTIMIZATION (Important) */
+@media(max-width:768px) {
+    .menu-btn { display:block; }
+    
+    nav {
+        position:absolute;
+        top: 100%; right:0;
+        background:#0f172a;
+        flex-direction:column;
+        width:100%;
+        padding:20px;
+        display:none; 
+        text-align: center;
+        border-top: 1px solid #1e293b;
+    }
+    nav.show { display:flex; }
+
+    .section-paragraph {
+        flex-direction:column !important; /* Stack image on top of text */
+        padding: 30px 20px;
+        text-align: center;
+        text-align: justify;
+    }
+    
+    .section-paragraph img, 
+    .section-paragraph .text {
+        width: 100% !important; /* Take full width on mobile */
+        height: auto !important;
+    }
+
+    .hero-slider { height:45vh; }
+    .hero-content h2 { font-size: 26px; }
+
+  }
+
+/* CONTACT BOX SECTION */
+.contact-section {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+  padding: 50px 8%;
+  background: rgba(8, 8, 8, 0.95);
+}
+
+.contact-box {
+  background: #ffffff;
+  padding: 30px 20px;
+  text-align: center;
+  border-radius: 14px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.contact-box:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 14px 30px rgba(0,0,0,0.25);
+}
+
+.contact-box i {
+  font-size: 34px;
+  color: #e98707;
+  margin-bottom: 12px;
+}
+
+.contact-box h3 {
+  font-size: 20px;
+  margin-bottom: 10px;
+  color: #0f172a;
+}
+
+.contact-box p {
+  font-size: 15px;
+  color: #333;
+  line-height: 1.6;
+}
+/* 📱 Mobile Responsive */
+@media(max-width:768px) {
+  .contact-section {
+    grid-template-columns: 1fr;
+    padding: 30px 20px;
+  }
+}
+
+
+footer { text-align:center; padding:25px; background:#020617; color:#94a3b8; }
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">
+    <img src="https://assets.zollege.in/public/college_data/images/logos/1656318814logo.jpg">
+    <strong>FS University</strong>
+  </div>
+
+  <!-- ☰ BUTTON -->
+  <div class="menu-btn" onclick="toggleMenu()">☰</div>
+
+  <nav id="navMenu">
+    <a href="#Home">Home</a>
+    <a href="courses.html">Courses</a>
+    <a href="admission form.html">Admission</a>
+    <a href="result.html">Result</a>
+    <a href="login.html">Login</a>
+    <a href="profile.html" id="profileLink" style="display:none;">Profile</a>
+
+  </nav>
+</header>
+
+<section id="Home">
+
+<div class="hero-slider">
+
+  <div class="hero-slide active">
+    <img src="https://fsu.edu.in/wp-content/uploads/2025/05/IMGL9269.jpg" alt="Slide 1">
+  </div>
+
+  <div class="hero-slide">
+    <img src="https://fsu.edu.in/wp-content/uploads/2025/03/fs1.jpg" alt="Slide 2">
+  </div>
+
+  <div class="hero-slide">
+    <img src="https://image-static.collegedunia.com/public/college_data/images/campusimage/1703582360408034588_409828728056034_4694452873503126887_n.jpg" alt="Slide 3">
+  </div>
+
+<div class="hero-slide">
+<img src="https://images.shiksha.com/mediadata/images/1703140322phplokPHx.jpeg" alt=" Slide 4">
+</div>
+
+<div class="hero-slide">
+<img src="https://images.shiksha.com/mediadata/images/1702915676phpzWGCzT.jpeg" alt="Slide 5">
+</div>
+
+<div class="hero-slide">
+<img src="https://fsu.edu.in/wp-content/uploads/2025/05/IMGL9637.jpg" alt="Slide 6">
+</div>
+
+<div class="hero-slide">
+<img src="https://fsu.edu.in/wp-content/uploads/2025/05/IMGL9637.jpg" alt="Slide 7">
+</div>
+
+</div>
+</section>
+<div class="social-sidebar">
+  <a href="https://www.facebook.com/fsuedu" target="_blank">
+    <img src="https://fsu.edu.in/wp-content/plugins/ultimate-social-media-icons/images/icons_theme/default/default_facebook.png" alt="Facebook">
+  </a>
+  <a href="https://www.twitter.com/fsuedu" target="_blank">
+    <img src="https://fsu.edu.in/wp-content/plugins/ultimate-social-media-icons/images/icons_theme/default/default_twitter.png" alt="X">
+  </a>
+  <a href="https://www.youtube.com/channel/UC2oEHAUkdADjxfJraVMu43g" target="_blank">
+    <img src="https://fsu.edu.in/wp-content/plugins/ultimate-social-media-icons/images/icons_theme/default/default_youtube.png" alt="YouTube">
+  </a>
+  <a href="https://www.instagram.com/fsuedu.in/?utm_medium=copy_link" target="_blank">
+    <img src="https://fsu.edu.in/wp-content/plugins/ultimate-social-media-icons/images/icons_theme/default/default_instagram.png" alt="Instagram">
+  </a>
+</div>
+<section id="About-us">
+<section class="top-section">
+<h2>About us</h2>
+
+  <!-- MESSAGE CONTENT -->
+  <section class="section-paragraph">
+   <img src="https://fsu.edu.in/wp-content/uploads/2024/12/Fulan-Singh-Ji-FS-University.png">
+  <div class="text">
+    
+    <h1>A Tribute to a Visionary Leader</h1>
+  
+     <p><strong>The Fraternity of FS University pays tribute to our esteemed patron, Late (Shri) Fulan Singh Ji, whose values and
+       ideals continue to inspire us. His unwavering belief in the power of education has shaped the foundation of our
+        institution, and his legacy lives on in every student who walks through the gates of FS University.
+        In 2004, Dr. Dilip Yadav set out to fulfill the vision of his beloved father, Late (Shri) Fulan Singh, by establishing
+        institutions dedicated to providing quality education to society and beyond. FS University stands as a tribute to his
+        legacy, initiated under the Fulan Singh Jan Kalyan Trust, with the mission of making Shikohabad, Uttar Pradesh, a
+        recognized hub for knowledge seekers from all walks of life. The FS University fraternity proudly honors and pays tribute to our
+        esteemed visionary patron, Late (Shri) Fulan Singh Ji.
+      </strong></p>
+  </div>
+</section>
+
+
+<section class="section-paragraph">
+  <img src="https://fsu.edu.in/wp-content/uploads/2025/03/Dilip-Yadav-FS-University-Shikohabad.jpg"style="width:450px; height:400px; ">
+  <div class="text">
+    <h1>
+Chancellor’s Message </h1>
+    <p><strong><i>Welcome to FS University. Our mission is to provide students with high-quality, practical, and 
+      value-based education that equips them for success in both academic and professional pursuits. At FS University,
+      we believe that education is not limited to acquiring knowledge; it is also a powerful means for personality development and fostering social  <br><br>
+
+Founded in 2004 in Firozabad under the FS Group of Institutions, the University reflects decades of experience in the 
+education sector. We have developed modern infrastructure, a student-centric learning environment, and a team of dedicated
+ faculty to ensure that our students acquire knowledge, skills, and confidence to excel in their chosen paths.
+<br><br>
+We are committed to nurturing leaders who will make meaningful contributions to society and the nation. FS University
+ strives to provide every student with the guidance and opportunities needed to realize their full potential.
+<br><br>
+— Dr. Dileep Yadav
+Founder & Chancellor, FS University</i></strong></p>
+  </div>
+</section>
+<section class="section-paragraph">
+  <img src="https://fsu.edu.in/wp-content/uploads/2025/03/Dr.-Yogesh-yadav-FS-University.jpg"style="width:500px; height:400px; ">
+  <div class="text">
+    <h1>Pro Chancellor's Message </h1>
+    <p><strong><i>
+  Dr. Yogesh Yadav, as the Pro-Chancellor of FS University, considers it both an honor and a responsibility to uphold and advance the visionary ideals and academic values upon which the University was founded. He believes that education is not merely the acquisition of knowledge, but a powerful means of developing character, discipline, ethics, and social <br><br>
+
+Under his guidance, FS University is committed to providing quality education, world-class infrastructure, and a progressive teaching-learning environment that fosters holistic development of students. The goal is to nurture confident, competent, and value-driven individuals who are prepared to meet global challenges and contribute meaningfully to society and the nation. Every student is encouraged to discover their potential, refine their abilities, and achieve lasting success.
+<br><br>
+— Dr. Yogesh Yadav <br>
+(Pro-Chancellor)
+</i></strong></p>
+  </div>
+</section>
+
+<section class="section-paragraph">
+  <img src="https://fsu.edu.in/wp-content/uploads/2025/03/PROF.-Dr.-SANJEEV-BHARDWAJ.jpeg"style="width:500px; height:350px; ">
+  <div class="text">
+    <h1>Vice Chancellor's Message </h1>
+    <p><strong><i>
+Welcome to FS University. I am <strong>Dr. Bhardwaj</strong>, your Vice-Chancellor. FS University has always been built on the principles of excellence, innovation, and holistic education. Our mission is not only to provide high-quality knowledge but also to cultivate critical thinking, creativity, and a strong sense of responsibility among our students.<br><br>
+Here, we strive to create an environment where learning goes beyond the classroom. Our modern infrastructure, experienced faculty, and value-driven programs are designed to help you explore your potential, achieve your goals, and prepare for meaningful contributions to society and the nation.<br><br>
+I encourage you to embrace every opportunity, challenge yourself, and grow into a confident, capable, and responsible individual who takes pride in being part of the FS University family.
+
+</i></strong></p>
+  </div>
+</section>
+</section>
+</section>
+
+<section id="courses">
+
+
+</section>
+
+<section class="contact-section">
+
+  <div class="contact-box">
+    <i class="fa-solid fa-phone"></i>
+    <h3>Contact</h3>
+    <p><strong><a href="tel:+917900889820">+91-7900889820</a></strong></p>
+    <p><strong><a href="tel:+919917286666">+91-9917286666</a></strong></p>
+  </div>
+
+  <div class="contact-box">
+    <i class="fa-solid fa-location-dot"></i>
+    <h3>Address</h3>
+    <p><strong>
+      NH 19, Agra Road,<br>
+      Near Balaji Mandir,<br>
+      Shikohabad, Firozabad,<br>
+      Uttar Pradesh – 283135
+    </strong></p>
+  </div>
+
+  <div class="contact-box">
+    <i class="fa-solid fa-envelope"></i>
+    <h3>Email</h3>
+    <p><strong><a href="mailto:info@fsu.edu.in">info@fsu.edu.in</a></strong></p>
+    <p><strong><a href="mailto:admission@fsu.edu.in">admission@fsu.edu.in</a></strong></p>
+  </div>
+
+</section>
+
+<hr>
+
+<footer>© 12/2025 FS University | Created by Ajay Kumar</footer>
+
+<script>
+/* ☰ MENU TOGGLE */
+function toggleMenu() {
+    const nav = document.getElementById('navMenu');
+    nav.classList.toggle('show');
+}
+
+// Naya Code: Har link par click hone par menu hide ho jaye
+document.querySelectorAll('#navMenu a').forEach(link => {
+    link.addEventListener('click', () => {
+        const nav = document.getElementById('navMenu');
+        // Mobile view mein 'show' class remove karni hai
+        if (nav.classList.contains('show')) {
+            nav.classList.remove('show');
+        }
+    });
+});
+
+/* CLICK ANYWHERE → HIDE MENU */
+document.addEventListener("click",function(e){
+  const menu=document.getElementById("navMenu");
+  const btn=document.querySelector(".menu-btn");
+  if(menu.classList.contains("show")){
+    if(!menu.contains(e.target) && !btn.contains(e.target)){
+      menu.classList.remove("show");
+    }
+  }
+});
+
+/* HERO SLIDER */
+let slides=document.querySelectorAll(".hero-slide");
+let i=0;
+setInterval(()=>{
+  slides[i].classList.remove("active");
+  i=(i+1)%slides.length;
+  slides[i].classList.add("active");
+},4000);
+// ✅ LOGIN CHECK → PROFILE LINK SHOW
+if(localStorage.getItem("loggedIn") === "yes"){
+  document.getElementById("profileLink").style.display = "inline-block";
+}
+
+
+
+function applyCourse(courseName){
+  localStorage.setItem("selectedCourse", courseName);
+  window.location.href = "admission form.html"; 
+}
+
+// 1. Har course ki Total Seats define karein
+const courseSettings = {
+    "A.N.M": { total: 40 },
+    "B.tech": { total: 10 },
+    "BBA": { total: 50 },
+    "BCA": { total: 50 },
+    "B.com": { total: 60 },
+    "BA": { total: 100 },
+    "BA.LLB": { total: 40 },
+    "B.sc": { total: 80 },
+    "B.sc Nursing": { total: 200 },
+    "B.sc Ag": { total: 50 },
+    "B.Pharm": { total: 60 },
+    "D.Pharm": { total: 130 },
+    "GNM": { total: 40 },
+    "LLB": { total: 50 },
+    "LAW":{total:85},
+    "MCA":{total:95},
+    "MBA":{total:85},
+    "M.com":{total:110},
+    "M.tech":{total:70},
+    "Polytechnic":{total:200},
+
+};
+
+// 2. Seats check karne aur Button hide karne ka function
+function updateSeatUI() {
+    let students = JSON.parse(localStorage.getItem("students")) || [];
+    
+    // Har course ko loop karke check karenge
+    for (let courseName in courseSettings) {
+        // Count kitne students ne is course mein admission liya
+        let filledSeats = students.filter(s => s.course === courseName).length;
+        let total = courseSettings[courseName].total;
+        let available = total - filledSeats;
+
+        // UI par seats dikhane ke liye (agar aapne span banaya hai)
+        let seatDisplay = document.getElementById(`seats-${courseName}`);
+        let btn = document.getElementById(`btn-${courseName}`);
+
+        if (seatDisplay) {
+            if (available <= 0) {
+                seatDisplay.innerHTML = "<b style='color:red;'>Seats Full!</b>";
+                if (btn) btn.style.display = "none"; // Button hide kar do
+            } else {
+                seatDisplay.innerHTML = `Available Seats: ${available} / ${total}`;
+            }
+        }
+    }
+}
+
+// 3. Apply button click hone par course save karna
+function applyCourse(courseName) {
+    localStorage.setItem("selectedCourse", courseName);
+}
+
+// Page load hote hi seats check karein
+document.addEventListener("DOMContentLoaded", updateSeatUI);
+
+</script>
+
+</body>
+</html>

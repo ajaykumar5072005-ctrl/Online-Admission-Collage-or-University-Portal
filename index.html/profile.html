@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Student Profile</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{font-family:Arial;background:#f4f6f8}
+.box{
+  max-width:500px;
+  margin:40px auto;
+  background:#fff;
+  padding:20px;
+  border-radius:8px;
+}
+button{
+  background:#d32f2f;
+  color:#fff;
+  border:none;
+  padding:10px;
+  width:100%;
+}
+#emiPayBox input {
+  display: block;
+}
+.back-btn {
+  background: #004aad !important; 
+  margin-top: 10px;
+  cursor: pointer;
+  
+}
+.back-btn:hover {
+  background: #003580 !important;
+}
+button {
+  background: #d32f2f;
+  color: #fff;
+  border: none;
+  padding: 8px 15px;      /* Upar-niche 8px, left-right 15px */
+  width: auto;            /* 100% hata kar auto kar dein */
+  min-width: 120px;       /* Kam se kam itni width rahegi */
+  border-radius: 4px;     /* Corners thode round karne ke liye */
+  cursor: pointer;
+  margin: 5px;            /* Buttons ke beech thodi jagah */
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+  <h2>My Details</h2>
+  <p><b>Admission No:</b> <span id="admissionNo"></span></p>
+  <p><b>Name:</b> <span id="name"></span></p>
+  <p><b>Father:</b> <span id="father"></span></p>
+  <p><b>Mother:</b> <span id="mother"></span></p>
+  <p><b>Email:</b> <span id="email"></span></p>
+  <p><b>Phone:</b> <span id="phone"></span></p>
+  <p><b>Course :</b> <span id="p_course"></span></p>
+<p><b>Branch :</b> <span id="p_branch"></span></p>
+
+  <p><b>Year / Semester:</b> <span id="study"></span></p>
+  <p><b>Fees Mode:</b> <span id="payment"></span></p>
+  
+  <hr>
+
+  <h3>Syllabus</h3>
+  <button onclick="openSyllabus()">View Syllabus PDF</button>
+
+<h3>Payment History</h3>
+<ul id="paymentHistory"></ul>
+
+<h3 id="payEmiHeading" style="display:none;">Pay Due EMI</h3>
+
+
+<div id="emiPayBox" style="display:none;">
+  <select id="emiSelect" style="display:none;margin-bottom:10px;"></select>
+  <input type="text" id="emiUpi" placeholder="Enter UPI ID">
+  <div id="emiPayErr" style="color:red;font-size:13px"></div>
+  <button onclick="payDueEmi()">Pay EMI Online</button>
+</div>
+<hr>
+
+<button id="nextAdmissionBtn" onclick="applyNextAdmission()">
+  Apply for Next Year / Semester
+</button>
+
+<button id="degreeBtn" style="display:none; background:#28a745; color:white; border:none; padding:10px; width:100%; margin-top:10px;" onclick="downloadCertificate('Degree')">
+  Download Degree Certificate 
+</button>
+<button id="diplomaBtn" style="display:none; background:#28a745; color:white; border:none; padding:10px; width:100%; margin-top:10px;" onclick="downloadCertificate('Diploma')">
+  Download Diploma Certificate 
+</button>
+<hr>
+<h3>View Old Details</h3>
+
+<button onclick="viewOldDetails()">View Old Details</button>
+<br><br>
+<select id="oldSelect" style="display:none"></select>
+
+<div id="oldDetailsBox" class="box" style="display:none;margin-top:20px;">
+  <h3>Old Admission Details</h3>
+  <p><b>Name:</b> <span id="o_name"></span></p>
+  <p><b>Father:</b> <span id="o_father"></span></p>
+  <p><b>Mother:</b> <span id="o_mother"></span></p>
+  <p><b>Email:</b> <span id="o_email"></span></p>
+  <p><b>Phone:</b> <span id="o_phone"></span></p>
+
+  <p><b>Course:</b> <span id="o_course"></span></p>
+  <p><b>Study:</b> <span id="o_study"></span></p>
+  <p><b>Payment Mode:</b> <span id="o_payment"></span></p>
+  <p><b>Date:</b> <span id="o_date"></span></p>
+</div>
+<hr>
+
+
+<select id="resultSelect" style="display:none;margin-bottom:10px"></select>
+
+<button onclick="openResult()">Result</button>
+
+
+  <button onclick="logout()">Logout</button>
+  <button class="back-btn" onclick="goHome()">Back</button>
+</div>
+
+<script>
+if(localStorage.getItem("loggedIn") !== "yes"){
+  window.location.href = "login.html";
+}
+
+const data = JSON.parse(localStorage.getItem("currentStudent"));
+document.getElementById("admissionNo").innerText = data.admissionNo;
+
+
+// 1. Updated Course Duration List (Bachelor, Diploma & Master's)
+const courseDuration = {
+    // Diploma (2-3 Years)
+    "A.N.M": 2, "D.Pharm": 2, "Polytechnic": 3, "GNM": 3,
+    
+    // Bachelor Degrees (3-5 Years)
+    "B.tech": 4, "BBA": 3, "BCA": 3, "B.com": 3, "BA": 3, "B.sc": 3, 
+    "B.sc Nursing": 4, "B.sc Ag": 4, "B.Pharm": 4, "LLB": 3, "BA.LLB": 5, "LAW": 3,
+    
+    // Master's Degrees (Most are 2 Years)
+    "MBA": 2, "MCA": 2, "M.com": 2, "M.tech": 2, "M.sc": 2, "MA": 2, "M.Pharm": 2
+};
+
+function checkCourseCompletion() {
+    const student = JSON.parse(localStorage.getItem("currentStudent"));
+    if (!student) return;
+
+    const maxYears = courseDuration[student.course] || 3; 
+    const maxSemesters = maxYears * 2; // Semester count calculate 
+    let isComplete = false;
+
+    // 2. CHECK: Is the student in Final Year or Final Semester?
+    if (student.studyType === "year") {
+        if (parseInt(student.year) >= maxYears) isComplete = true;
+    } else if (student.studyType === "semester") {
+        if (parseInt(student.semester) >= maxSemesters) isComplete = true;
+    }
+
+    if (isComplete) {
+        // Admission button hide 
+        document.getElementById("nextAdmissionBtn").style.display = "none";
+
+        // 3. EMI PENDING CHECK (Very Important)
+        const hasDueEmi = student.paymentHistory.some(p => p.status === "DUE");
+
+        // Categories define 
+        const diplomaCourses = ["A.N.M", "D.Pharm", "Polytechnic", "GNM"];
+        const masterCourses = ["MBA", "MCA", "M.com", "M.tech", "M.sc", "MA"];
+        
+        let targetBtn;
+        if (diplomaCourses.includes(student.course)) {
+            targetBtn = document.getElementById("diplomaBtn");
+            targetBtn.innerText = "Download Diploma Certificate 📜";
+        } else {
+            targetBtn = document.getElementById("degreeBtn");
+            targetBtn.innerText = masterCourses.includes(student.course) ? "Download Master's Degree 🎓" : "Download Bachelor's Degree 🎓";
+        }
+
+        // 4. LOCK / UNLOCK System
+        targetBtn.style.display = "block";
+
+        if (hasDueEmi) {
+            // If EMI is pending, the button will remain locked.
+            targetBtn.disabled = true;
+            targetBtn.style.background = "#6c757d"; // Grey color
+            targetBtn.style.cursor = "not-allowed";
+            targetBtn.title = "Please pay all due EMIs to unlock your certificate.";
+            targetBtn.innerText += " (Locked: Clear Dues)";
+        } else {
+            // If everything is paid, the button will be unlocked.
+            targetBtn.disabled = false;
+            targetBtn.style.background = "#28a745"; // Green color
+            targetBtn.style.cursor = "pointer";
+            targetBtn.innerText = targetBtn.innerText.replace(" (Locked: Clear Dues)", ""); // Text clean karein
+        }
+    }
+}
+
+// Function call
+checkCourseCompletion();
+
+// 3. Download Function (Dummy)
+function downloadCertificate(type) {
+    alert(type + " download karne ke liye taiyar hai! (Aap yahan PDF link add kar sakte hain)");
+}
+if(data){
+  document.getElementById("admissionNo").innerText = data.admissionNo;
+  document.getElementById("name").innerText = data.name;
+  document.getElementById("father").innerText = data.father;
+  document.getElementById("mother").innerText = data.mother;
+
+  document.getElementById("email").innerText = data.email;
+  document.getElementById("phone").innerText = data.phone;
+
+ document.getElementById("p_course").innerText = data.course || "-";
+const technicalCourses = ["B.tech", "M.tech", "Polytechnic"];
+const branchP = document.querySelector("p:has(#p_branch)"); 
+if (technicalCourses.includes(data.course) && data.branch) {
+    branchP.style.display = "block"; 
+    document.getElementById("p_branch").innerText = data.branch;
+} else {
+    branchP.style.display = "none"; // Hide the branch in non-technical courses.
+}
+
+  document.getElementById("study").innerText =
+    data.studyType === "year"
+      ? data.year + " Year"
+      : data.semester + " Semester";
+
+  
+  document.getElementById("payment").innerText =
+    data.paymentMode === "emi" ? "EMI" : "FULL";
+}
+
+//syllabus PDF open button
+function openSyllabus(){
+  const student = JSON.parse(localStorage.getItem("currentStudent"));
+  if(student && student.syllabusPDF){
+    window.open(student.syllabusPDF, "_blank");
+  }else{
+    alert("Syllabus not available");
+  }
+}
+// Result open button
+function openResult(){
+
+  const student = JSON.parse(localStorage.getItem("currentStudent"));
+  const select = document.getElementById("resultSelect");
+
+  if(!student || !student.result){
+    alert("Result not available");
+    return;
+  }
+  let pdfPath = "";
+  if(select.style.display !== "none" && select.value){
+    pdfPath = `results/${select.value}.pdf`;
+  }
+  //  Default current year/semester result
+  else{
+    if(student.result.type === "year"){
+      pdfPath = student.result.pdf;
+    }else{
+      pdfPath = student.result.pdf;
+    }
+  }
+
+  window.open(pdfPath, "_blank");
+}
+
+
+//Payment History
+const list = document.getElementById("paymentHistory");
+list.innerHTML = "";
+
+if(!data.paymentHistory || data.paymentHistory.length === 0){
+  list.innerHTML = "<li>No payment history found</li>";
+}
+else{
+  //  FULL PAYMENT
+  if(data.paymentMode === "full"){
+    const p = data.paymentHistory.find(p => p.type === "FULL");
+
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <b>FULL PAYMENT:</b> ₹${p.amount}
+      <b style="color:green">PAID</b>
+      (${p.date || "-"})
+    `;
+    list.appendChild(li);
+  }
+
+  // EMI PAYMENT
+  else if(data.paymentMode === "emi"){
+
+    const paidEMIs = data.paymentHistory.filter(
+      p => p.type === "EMI" && p.status === "PAID"
+    );
+
+    const dueEMIs = data.paymentHistory.filter(
+      p => p.type === "EMI" && p.status === "DUE"
+    );
+
+    if(paidEMIs.length > 0){
+      const h = document.createElement("li");
+      h.innerHTML = "<b>Paid EMIs:</b>";
+      list.appendChild(h);
+
+      paidEMIs.forEach(p=>{
+        const li = document.createElement("li");
+        li.innerHTML = `
+          EMI ${p.emiNo} : ₹${p.amount}
+          <b style="color:green">PAID</b>
+          (${p.date || "-"})
+        `;
+        list.appendChild(li);
+      });
+    }
+
+    if(dueEMIs.length > 0){
+      const h = document.createElement("li");
+      h.innerHTML = "<b>Due EMIs:</b>";
+      list.appendChild(h);
+
+      dueEMIs.forEach(p=>{
+        const li = document.createElement("li");
+        li.innerHTML = `
+          EMI ${p.emiNo} : ₹${p.amount}
+          <b style="color:red">DUE</b>
+        `;
+        list.appendChild(li);
+      });
+    }
+  }
+}
+
+//Logout function
+function logout(){
+  localStorage.removeItem("loggedIn");
+  localStorage.removeItem("currentStudent");
+  window.location.href="index.html";
+}
+function goHome() {
+  window.location.href = "index.html";
+}
+function showEmiPayOption(){
+  if(!data || !data.paymentHistory) return;
+
+  const dueEmis = data.paymentHistory.filter(
+    p => p.type === "EMI" && p.status === "DUE"
+  );
+
+  const emiBox   = document.getElementById("emiPayBox");
+  const emiSelect= document.getElementById("emiSelect");
+  const heading  = document.getElementById("payEmiHeading");
+  const upiInput = document.getElementById("emiUpi");
+
+  //  No EMI is due.
+  if(dueEmis.length === 0){
+    emiBox.style.display = "none";
+    heading.style.display = "none";
+    return;
+  }
+
+  // EMI payment box show
+  emiBox.style.display = "block";
+  heading.style.display = "block";
+  upiInput.style.display = "block";
+
+  //  SIRF 1 EMI DUE → select hide
+  if(dueEmis.length === 1){
+    emiSelect.style.display = "none";
+    emiSelect.innerHTML = "";
+    return;
+  }
+
+  //  2 or more EMI due → show select
+  emiSelect.style.display = "block";
+  emiSelect.innerHTML = `<option value="">Select EMI Count</option>`;
+
+  for(let i = 1; i <= dueEmis.length; i++){
+    emiSelect.innerHTML += `<option value="${i}">${i} EMI</option>`;
+  }
+}
+// ===== RESULT SELECT LOGIC =====
+function setupResultOption(){
+
+  const student = JSON.parse(localStorage.getItem("currentStudent"));
+  if(!student || !student.result) return;
+
+  const select = document.getElementById("resultSelect");
+
+  // ===== YEAR WISE =====
+  if(student.result.type === "year"){
+
+    const currentYear = parseInt(student.result.year);
+
+    //  1st Year → select hide
+    if(currentYear === 1){
+      select.style.display = "none";
+      return;
+    }
+
+    //  2nd+ Year → select show
+    select.style.display = "block";
+    select.innerHTML = `<option value="">Select Year</option>`;
+
+    for(let y = 1; y <= currentYear; y++){
+      select.innerHTML += `<option value="year-${y}">Year ${y}</option>`;
+    }
+  }
+
+  // ===== SEMESTER WISE =====
+  if(student.result.type === "semester"){
+
+    const currentSem = parseInt(student.result.semester);
+
+    // 1st Semester → select hide
+    if(currentSem === 1){
+      select.style.display = "none";
+      return;
+    }
+
+    // 2nd+ Semester → select show
+    select.style.display = "block";
+    select.innerHTML = `<option value="">Select Semester</option>`;
+
+    for(let s = 1; s <= currentSem; s++){
+      select.innerHTML += `<option value="semester-${s}">Semester ${s}</option>`;
+    }
+  }
+}
+
+function payDueEmi(){
+
+  const emiSelect = document.getElementById("emiSelect");
+  let emiCount = 1; 
+  
+  if(emiSelect.style.display !== "none"){
+    emiCount = parseInt(emiSelect.value);
+
+    if(!emiCount){
+      document.getElementById("emiPayErr").innerText = "Select EMI count";
+      return;
+    }
+  }
+
+  const upi = document.getElementById("emiUpi").value.trim();
+  if(!upi){
+    document.getElementById("emiPayErr").innerText = "Enter UPI ID";
+    return;
+  }
+
+  let students = JSON.parse(localStorage.getItem("students")) || [];
+  const current = students.find(s => s.email === data.email);
+  if(!current) return;
+
+  let paid = 0;
+
+  //  due EMI sequentially pay
+  for(let emi of current.paymentHistory){
+    if(emi.type === "EMI" && emi.status === "DUE" && paid < emiCount){
+      emi.status = "PAID";
+      emi.date = new Date().toLocaleDateString();
+      paid++;
+    }
+  }
+
+  localStorage.setItem("students", JSON.stringify(students));
+  localStorage.setItem("currentStudent", JSON.stringify(current));
+
+  alert(`✔ ${emiCount} EMI Payment Successful`);
+  window.location.reload();
+}
+
+showEmiPayOption();
+
+function applyNextAdmission(){
+
+  const student = JSON.parse(localStorage.getItem("currentStudent"));
+  if(!student){
+    alert("Session expired, login again");
+    return;
+  }
+
+  //  EMI DUE CHECK
+  if(student.paymentMode === "emi"){
+    const hasDueEmi = student.paymentHistory.some(
+      p => p.type === "EMI" && p.status === "DUE"
+    );
+
+    if(hasDueEmi){
+      alert("⚠️ Your EMI Amount is Due. Please pay all dues before applying for next admission.");
+      return; 
+    }
+  }
+
+  //  Allow only if all EMIs are paid.
+  localStorage.setItem("reApplyStudent", JSON.stringify(student));
+  localStorage.setItem("selectedCourse", student.course);
+  localStorage.setItem("selectedBranch", student.branch);
+  localStorage.setItem("isNextAdmission","yes");
+  
+  window.location.href = "admission form.html";
+}
+
+function viewOldDetails(){
+  const student = JSON.parse(localStorage.getItem("currentStudent"));
+  const allOldAdmissions = JSON.parse(localStorage.getItem("oldAdmissions")) || [];
+  const studentOld = allOldAdmissions.filter(a => a.email === student.email);
+  const selectBox = document.getElementById("oldSelect");
+
+  if(!student){
+    alert("No student found");
+    return;
+  }
+
+  selectBox.style.display = "block";
+  selectBox.innerHTML = `<option value="">Select</option>`;
+
+  if(student.studyType === "year"){
+    studentOld.forEach(a => {
+      selectBox.innerHTML += `<option value="${a.year}">Year ${a.year}</option>`;
+    });
+  } else {
+    studentOld.forEach(a => {
+      selectBox.innerHTML += `<option value="${a.semesterFrom}">Semester ${a.semesterFrom}</option>`;
+    });
+  }
+
+  selectBox.onchange = function(){
+    if(!this.value) return;
+    const selected = parseInt(this.value);
+    let record = null;
+
+    if(student.studyType === "year"){
+      record = studentOld.find(a => a.year === selected);
+    } else {
+      record = studentOld.find(a => a.semesterFrom === selected);
+    }
+
+    if(!record){
+      alert("Data not available for selected option");
+      return;
+    }
+
+    document.getElementById("oldDetailsBox").style.display="block";
+    document.getElementById("o_name").innerText = record.name || "-";
+    document.getElementById("o_father").innerText = record.father || "-";
+    document.getElementById("o_mother").innerText = record.mother || "-";
+    document.getElementById("o_email").innerText = record.email || "-";
+    document.getElementById("o_phone").innerText = record.phone || "-";
+    document.getElementById("o_course").innerText = record.course + (record.branch ? " (" + record.branch + ")" : "");
+    document.getElementById("o_study").innerText = student.studyType === "year" ? record.year + " Year" : "Semester " + record.semesterFrom;
+    document.getElementById("o_payment").innerText = record.paymentMode === "emi" ? "EMI" : "FULL";
+    document.getElementById("o_date").innerText = record.date || "-";
+  };
+}
+setupResultOption();
+
+</script>
+</body>
+</html>
